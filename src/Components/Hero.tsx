@@ -19,7 +19,7 @@ const Hero = () => {
           { title: "Blockchain Analysis", desc: "Scan transactions in real-time for security threats." },
           { title: "AI-Powered Detection", desc: "Advanced machine learning to detect fraud instantly." },
           { title: "Fast & Secure", desc: "Check for fraudulent transactions with speed and accuracy." },
-          { title: "Always up to date", des: "Always up to date with the latest analysis on all blockchain projects."}
+          { title: "Always up to date", desc: "Always up to date with the latest analysis on all blockchain projects."}
         ].map((feature, index) => (
           <div key={index} className="p-8 bg-gray-800 rounded-xl shadow-lg hover:bg-gray-600 hover:shadow-md duration-300">
             <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
@@ -31,14 +31,9 @@ const Hero = () => {
       {/* Call to Action */}
       <section className="text-center py-16 bg-indigo-700">
         <h2 className="text-4xl font-bold">Try Our Fraud Detection System</h2>
-        <p className="mt-2 text-lg">Enter a wallet address to check for suspicious activity.</p>
         <div className="mt-6 flex justify-center">
-          <input
-            type="text"
-            className="px-4 py-2 text-black rounded-lg w-1/3"
-            placeholder="Enter Wallet Address"
-          />
-          <button className="ml-2 px-6 py-2 bg-green-500 rounded-lg font-bold hover:bg-green-600 transition">
+          <button className="ml-2 px-6 py-2 bg-green-500 rounded-lg font-bold hover:bg-green-600 transition"
+            onClick={() => window.location.href = '/detect'}>
             Check Now
           </button>
         </div>

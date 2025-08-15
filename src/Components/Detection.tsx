@@ -2,28 +2,53 @@ import { useState } from "react";
 
 const FraudDetection = () => {
   const [wallet, setWallet] = useState("");
-  const [balance, setBalance] = useState(null);
+  const [balance, setBalance] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [riskScore, setRiskScore] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [riskScore, setRiskScore] = useState<number | null>(null);
 
-  const fetchWalletData = () => {
+  const fetchWalletData = async () => {
+    const apiKey = import.meta.env.VITE_ETHERSCAN_API_KEY;
+    if (!apiKey) {
+      setError("Etherscan API key is not configured. Please add VITE_ETHERSCAN_API_KEY to your .env.local file and restart the server.");
+      console.error("Missing Etherscan API Key in environment variables.");
+      return;
+    }
+
     if (!wallet) {
-      setError(prompt("Please enter a wallet address."));
+      setError("Please enter a wallet address.");
       return;
     }
     setLoading(true);
     setError(null);
-    
-    // Generate random balance and risk score
-    const randomBalance = (Math.random() * 10).toFixed(4); // Random ETH balance
-    const randomRiskScore = Math.floor(Math.random() * 101); // Risk score between 0-100
-    
-    setTimeout(() => {
-      setBalance(randomBalance);
-      setRiskScore(randomRiskScore);
+    setBalance(null);
+    setRiskScore(null);
+
+    const url = `https://api.etherscan.io/api?module=account&action=balance&address=${wallet}&tag=latest&apikey=${apiKey}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status === "1") {
+        // Etherscan returns balance in Wei, so we convert it to Ether.
+        // 1 Ether = 10^18 Wei.
+        const etherBalance = (Number(BigInt(data.result)) / 1e18).toFixed(4);
+        setBalance(etherBalance);
+
+        // NOTE: Risk score is still random. A real implementation would
+        // require a dedicated service or more complex analysis.
+        const randomRiskScore = Math.floor(Math.random() * 101);
+        setRiskScore(randomRiskScore);
+      } else {
+        setError(data.result || "An error occurred while fetching data.");
+      }
+    } catch (err) {
+      setError("Failed to connect to the API. Please check your network connection.");
+      console.error(err);
+    } finally {
       setLoading(false);
-    }, 1000); // Simulate network delay
+    }
   };
 
   return (

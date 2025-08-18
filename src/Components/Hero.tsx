@@ -22,7 +22,26 @@ export const Hero = () => {
     // detect injected provider
     const provider = (window as any).ethereum;
     if (provider && provider.request) {
+      // get current accounts and listen for changes
       provider.request({ method: "eth_accounts" }).then(handleAccounts).catch(() => {});
+
+      // --- NEW: prompt user to connect once on page load if no account is present ---
+      // use a session flag so we don't repeatedly open the wallet prompt on every reload
+      if (!sessionStorage.getItem("walletPrompted")) {
+        provider.request({ method: "eth_accounts" })
+          .then((accounts: string[]) => {
+            if (!accounts || accounts.length === 0) {
+              // This will open the wallet connect dialog (user interaction required)
+              provider.request({ method: "eth_requestAccounts" })
+                .then(handleAccounts)
+                .catch(() => {});
+              sessionStorage.setItem("walletPrompted", "1");
+            }
+          })
+          .catch(() => {});
+      }
+      // --- END NEW ---
+
       provider.on?.("accountsChanged", handleAccounts);
       provider.on?.("chainChanged", () => window.location.reload());
     }
@@ -49,6 +68,7 @@ export const Hero = () => {
       console.error("Wallet connect failed", err);
     }
   };
+
 
   const disconnect = () => {
     setAccount(null);
